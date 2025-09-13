@@ -28,10 +28,7 @@ jobs:
           pip install semgrep
 
       - name: SAST Scan
-        id: semgrep
-        run: |
-          # use `semgrep ci` for better PR/diff awareness; `--error` makes semgrep scan return exit code 1 if findings exist
-          run: semgrep scan --config .semgrep.yml --sarif --output semgrep.sarif --error --all-targets
+        run: semgrep scan --config .semgrep.yml --sarif --output semgrep.sarif --error --all-targets
         # If you prefer semgrep scan with explicit error-on-findings:
         # run: semgrep scan --config .semgrep.yml --sarif --output semgrep.sarif --error
 
