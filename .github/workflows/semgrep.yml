@@ -1,11 +1,11 @@
 name: semgrep-scan
 
 on:
+  pull_request:
+    types: [opened, reopened, synchronize]
   push:
     branches:
-      - '**'        # run on pushes (you can restrict to PR branches if you prefer)
-  pull_request:
-    types: [opened, synchronize, reopened]
+      - '**'
 
 jobs:
   semgrep:
@@ -27,15 +27,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install semgrep
 
-      - name: Run semgrep scan (auto rules)
-        id: run-semgrep
+      - name: Run semgrep (fail on findings)
+        id: semgrep
         run: |
-          # CLI v1.12+ uses `semgrep scan` (older docs use semgrep --config)
-          semgrep scan --config auto --quiet --output semgrep-results.json || echo "::set-output name=semgrep_failed::true"
-
-      - name: Upload semgrep JSON artifact (optional)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: semgrep-results
-          path: semgrep-results.json
+          # Exit non-zero if any findings -> job fails -> status check fails
+          semgrep scan --config auto --error --output semgrep-results.json
