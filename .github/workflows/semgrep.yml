@@ -12,10 +12,10 @@ jobs:
     name: Semgrep scan
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code (full history)
+      - name: Checkout (full history)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0      # full git history required for diff-aware scan
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -27,14 +27,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install semgrep
 
-      - name: Run Semgrep (CI mode, outputs SARIF)
+      - name: Run semgrep (fail on any finding)
         id: semgrep
         run: |
-          # adjust --config to point to your .semgrep.yml, a registry pack like p/ci,
-          # or a list "p/owasp-top-ten,p/ci". semgrep ci integrates nicely with GitHub Actions.
+          # use `semgrep ci` for better PR/diff awareness; `--error` makes semgrep scan return exit code 1 if findings exist
           semgrep ci --config .semgrep.yml --sarif --output semgrep.sarif --timeout 10m
+        # If you prefer semgrep scan with explicit error-on-findings:
+        # run: semgrep scan --config .semgrep.yml --sarif --output semgrep.sarif --error
 
-      - name: Upload SARIF to GitHub Code Scanning (optional — shows results in GitHub)
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Upload SARIF for GitHub Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep.sarif
