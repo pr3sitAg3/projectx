@@ -1,12 +1,2 @@
 rules:
-  # Detect hard-coded secrets
-  - id: python.lang.correctness.security.hardcoded_secret
-
-  # Detect command injection
-  - id: python.lang.correctness.security.command_injection
-
-  # Detect SQL injection
-  - id: python.lang.correctness.security.sql_injection
-
-  # Optional: OWASP top 10 Python rules
-  - id: p/owasp-top-ten
+  - id: p/security-audit
