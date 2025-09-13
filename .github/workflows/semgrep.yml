@@ -31,7 +31,7 @@ jobs:
         id: semgrep
         run: |
           # use `semgrep ci` for better PR/diff awareness; `--error` makes semgrep scan return exit code 1 if findings exist
-          semgrep ci --config .semgrep.yml --sarif --output semgrep.sarif --timeout 600
+          semgrep ci --config .semgrep.yml --sarif --output semgrep.sarif --timeout 600 --all-targets --no-suppress-errors
         # If you prefer semgrep scan with explicit error-on-findings:
         # run: semgrep scan --config .semgrep.yml --sarif --output semgrep.sarif --error
 
