@@ -2,33 +2,39 @@ name: semgrep-scan
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened, synchronize, reopened]
   push:
     branches:
-      - '**'
+      - main
 
 jobs:
   semgrep:
-    name: semgrep
+    name: Semgrep scan
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout code (full history)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0      # full git history required for diff-aware scan
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.11'
 
-      - name: Install Semgrep
+      - name: Install semgrep
         run: |
           python -m pip install --upgrade pip
           pip install semgrep
 
-      - name: Run semgrep (fail on findings)
+      - name: Run Semgrep (CI mode, outputs SARIF)
         id: semgrep
         run: |
-          # Exit non-zero if any findings -> job fails -> status check fails
-          semgrep scan --config auto --error --output semgrep-results.json
+          # adjust --config to point to your .semgrep.yml, a registry pack like p/ci,
+          # or a list "p/owasp-top-ten,p/ci". semgrep ci integrates nicely with GitHub Actions.
+          semgrep ci --config .semgrep.yml --sarif --output semgrep.sarif --timeout 10m
+
+      - name: Upload SARIF to GitHub Code Scanning (optional — shows results in GitHub)
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: semgrep.sarif
