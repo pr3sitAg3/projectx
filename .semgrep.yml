@@ -1,7 +1,12 @@
-# .semgrep.yml
 rules:
-  - id: p/ci  # use Semgrep registry 'ci' pack (examples). You can add many.
-  - id: p/owasp-top-ten
+  # Detect hard-coded secrets
+  - id: python.lang.correctness.security.hardcoded_secret
 
-# You can also include local rules by file
-# - path: semgrep-rules/my-custom-rules.yml
+  # Detect command injection
+  - id: python.lang.correctness.security.command_injection
+
+  # Detect SQL injection
+  - id: python.lang.correctness.security.sql_injection
+
+  # Optional: OWASP top 10 Python rules
+  - id: p/owasp-top-ten
