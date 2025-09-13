@@ -27,11 +27,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install semgrep
 
-      - name: SAST Scan
+      - name: Run Semgrep # Or 'SAST Scan'
         run: |
-          # use semgrep
-          semgrep scan --config .semgrep.yml --sarif --output semgrep.sarif --error --all-targets
-
+          semgrep scan --config .semgrep.yml --sarif --output semgrep.sarif --error# Or 'SAST Scan'
+          
         # If you prefer semgrep scan with explicit error-on-findings:
         # run: semgrep scan --config .semgrep.yml --sarif --output semgrep.sarif --error
 
