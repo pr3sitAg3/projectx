@@ -1,0 +1,7 @@
+# .semgrep.yml
+rules:
+  - id: p/ci  # use Semgrep registry 'ci' pack (examples). You can add many.
+  - id: p/owasp-top-ten
+
+# You can also include local rules by file
+# - path: semgrep-rules/my-custom-rules.yml
