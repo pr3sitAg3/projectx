@@ -29,6 +29,7 @@ jobs:
 
       - name: SAST Scan
         run: |
+          # use semgrep
           semgrep scan --config .semgrep.yml --sarif --output semgrep.sarif --error --all-targets
 
         # If you prefer semgrep scan with explicit error-on-findings:
