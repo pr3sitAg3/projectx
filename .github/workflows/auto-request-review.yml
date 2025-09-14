@@ -1,0 +1,17 @@
+name: "Auto request reviewers on PR"
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  request-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request reviewers
+        uses: peter-evans/request-review@v2
+        with:
+          # single or comma-separated usernames
+          reviewers: "h1hakz,h2hakz"
+          # or teams: team_reviewers: "your-org/frontend-team"
+          # optional: add a message to the review request
+          message: "Hi — please review this PR when you get a chance."
