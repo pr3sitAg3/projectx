@@ -15,9 +15,10 @@ This project demonstrates an XML External Entity (XXE) vulnerability in a simple
 ## Setup and Installation
 
 **Install the required packages:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+
+ ```bash
+pip install -r requirements.txt
+ ```
 
 ## How to Run the Demo
 
