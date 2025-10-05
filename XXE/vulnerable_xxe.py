@@ -1,46 +1,67 @@
-# secure_lxml.py
-from flask import Flask, request, Response
+from flask import Flask, request
 from lxml import etree
 
 app = Flask(__name__)
 
-def make_safe_parser():
-    # Disallow DTD, external entities, network access and entity resolution.
-    return etree.XMLParser(
-        resolve_entities=False,  # DO NOT resolve external entities
-        load_dtd=False,          # Do not load DTD
-        no_network=True,         # Prevent fetching external resources
-        huge_tree=False          # avoid huge/DoS-ish trees
-    )
+# A simple HTML form for submitting XML data
+HTML_FORM = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XXE Vulnerable App</title>
+    <style>
+        body { font-family: sans-serif; background-color: #fff5f5; }
+        .container { max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #e57373; border-radius: 8px; background-color: white;}
+        textarea { width: 100%; box-sizing: border-box; }
+        pre { background-color: #f1f1f1; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚠️ Vulnerable XXE Parser</h1>
+        <p>This application parses XML using a dangerously configured parser. Try submitting an XXE payload to read a local file.</p>
+        <form action="/process" method="post">
+            <textarea name="xml_data" rows="10" cols="50" placeholder="Enter XML here..."></textarea><br><br>
+            <input type="submit" value="Process XML">
+        </form>
+        {% if result %}
+            <h2>Result:</h2>
+            <pre>{{ result }}</pre>
+        {% endif %}
+    </div>
+</body>
+</html>
+"""
+
+@app.route('/', methods=['GET'])
+def index():
+    # Using a templating engine is safer, but for this simple example,
+    # we'll use string replacement and ensure user content is escaped.
+    return HTML_FORM.replace("{% if result %}", "").replace("{{ result }}", "").replace("{% endif %}", "")
 
 @app.route('/process', methods=['POST'])
 def process_xml():
-    content_type = request.headers.get('Content-Type', '')
-    if 'application/xml' not in content_type:
-        return 'Error: Content-Type must be application/xml', 400
-
-    xml_data = request.get_data()
+    xml_data = request.form.get('xml_data', '')
     if not xml_data:
-        return 'Error: No XML data received', 400
+        return HTML_FORM.replace("{% if result %}", "{% if result %}").replace("{{ result }}", "Error: No XML data submitted.").replace("{% endif %}", "{% endif %}"), 400
 
     try:
-        parser = make_safe_parser()
-        # If there is a DTD or external entity, parser will not load/resolve them.
-        doc = etree.fromstring(xml_data, parser)
-
-        message_element = doc.find('message')
-        if message_element is not None and message_element.text is not None:
-            # safe: entity expansions will not be resolved to local files
-            return Response(f"Received message: {message_element.text}", mimetype='text/plain')
-        else:
-            return "XML parsed, but no 'message' element or empty content.", 400
-
-    except etree.XMLSyntaxError as e:
-        # don't leak internal details in production — this is for debugging
-        return f"XML Error: {e}", 400
+        # VULNERABLE: The parser is configured to resolve external entities.
+        # This is the source of the XXE vulnerability.
+        parser = etree.XMLParser(resolve_entities=True)
+        root = etree.fromstring(xml_data.encode(), parser)
+        result = etree.tostring(root, pretty_print=True).decode()
     except Exception as e:
-        return f"An unexpected error occurred: {e}", 500
+        result = f"Error parsing XML: {e}"
+
+    # Simple rendering for the example
+    rendered_html = HTML_FORM.replace("{% if result %}", "").replace("{% endif %}", "")
+    # Basic escaping to prevent the result from being interpreted as HTML
+    safe_result = result.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    rendered_html = rendered_html.replace("{{ result }}", safe_result)
+    
+    return rendered_html
 
 if __name__ == '__main__':
-    print("✅ Secure XXE-protected server started on http://127.0.0.1:5000")
-    app.run(port=5000)
+    print("Starting vulnerable server on http://127.0.0.1:5001")
+    app.run(debug=True, port=5001)
