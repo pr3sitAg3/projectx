@@ -14,27 +14,10 @@ This project demonstrates an XML External Entity (XXE) vulnerability in a simple
 
 ## Setup and Installation
 
-1.  **Create a virtual environment:**
-    ```bash
-    python -m venv venv
-    ```
-
-2.  **Activate the environment:**
-    -   On macOS/Linux:
-        ```bash
-        source venv/bin/activate
-        ```
-    -   On Windows:
-        ```bash
-        .\venv\Scripts\activate
-        ```
-
-3.  **Install the required packages:**
+**Install the required packages:**
     ```bash
     pip install -r requirements.txt
     ```
-
----
 
 ## How to Run the Demo
 
